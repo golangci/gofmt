@@ -7,7 +7,7 @@
 // one without the other. Determine if we can factor out functionality
 // in a public API. See also #11844 for context.
 
-package main
+package gofmt
 
 import (
 	"bytes"

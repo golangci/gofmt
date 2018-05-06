@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package main
+package gofmt
 
 import (
 	"bytes"
@@ -25,15 +25,15 @@ import (
 
 var (
 	// main operation modes
-	list        = flag.Bool("l", false, "list files whose formatting differs from gofmt's")
-	write       = flag.Bool("w", false, "write result to (source) file instead of stdout")
-	rewriteRule = flag.String("r", "", "rewrite rule (e.g., 'a[b:len(a)] -> a[b:]')")
-	simplifyAST = flag.Bool("s", false, "simplify code")
-	doDiff      = flag.Bool("d", false, "display diffs instead of rewriting files")
-	allErrors   = flag.Bool("e", false, "report all errors (not just the first 10 on different lines)")
+	list        = flag.Bool("gofmt.l", false, "list files whose formatting differs from gofmt's")
+	write       = flag.Bool("gofmt.w", false, "write result to (source) file instead of stdout")
+	rewriteRule = flag.String("gofmt.r", "", "rewrite rule (e.g., 'a[b:len(a)] -> a[b:]')")
+	simplifyAST = flag.Bool("gofmt.s", false, "simplify code")
+	doDiff      = flag.Bool("gofmt.d", false, "display diffs instead of rewriting files")
+	allErrors   = flag.Bool("gofmt.e", false, "report all errors (not just the first 10 on different lines)")
 
 	// debugging
-	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to this file")
+	cpuprofile = flag.String("gofmt.cpuprofile", "", "write cpu profile to this file")
 )
 
 const (
@@ -169,14 +169,6 @@ func visitFile(path string, f os.FileInfo, err error) error {
 
 func walkDir(path string) {
 	filepath.Walk(path, visitFile)
-}
-
-func main() {
-	// call gofmtMain in a separate function
-	// so that it can use defer and have them
-	// run before the exit.
-	gofmtMain()
-	os.Exit(exitCode)
 }
 
 func gofmtMain() {

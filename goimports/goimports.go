@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package main
+package goimports
 
 import (
 	"bufio"
@@ -26,15 +26,15 @@ import (
 
 var (
 	// main operation modes
-	list    = flag.Bool("l", false, "list files whose formatting differs from goimport's")
-	write   = flag.Bool("w", false, "write result to (source) file instead of stdout")
-	doDiff  = flag.Bool("d", false, "display diffs instead of rewriting files")
-	srcdir  = flag.String("srcdir", "", "choose imports as if source code is from `dir`. When operating on a single file, dir may instead be the complete file name.")
+	list    = flag.Bool("goimports.l", false, "list files whose formatting differs from goimport's")
+	write   = flag.Bool("goimports.w", false, "write result to (source) file instead of stdout")
+	doDiff  = flag.Bool("goimports.d", false, "display diffs instead of rewriting files")
+	srcdir  = flag.String("goimports.srcdir", "", "choose imports as if source code is from `dir`. When operating on a single file, dir may instead be the complete file name.")
 	verbose bool // verbose logging
 
-	cpuProfile     = flag.String("cpuprofile", "", "CPU profile output")
-	memProfile     = flag.String("memprofile", "", "memory profile output")
-	memProfileRate = flag.Int("memrate", 0, "if > 0, sets runtime.MemProfileRate")
+	cpuProfile     = flag.String("goimports.cpuprofile", "", "CPU profile output")
+	memProfile     = flag.String("goimports.memprofile", "", "memory profile output")
+	memProfileRate = flag.Int("goimports.memrate", 0, "if > 0, sets runtime.MemProfileRate")
 
 	options = &imports.Options{
 		TabWidth:  8,
@@ -46,8 +46,8 @@ var (
 )
 
 func init() {
-	flag.BoolVar(&options.AllErrors, "e", false, "report all errors (not just the first 10 on different lines)")
-	flag.StringVar(&imports.LocalPrefix, "local", "", "put imports beginning with this string after 3rd-party packages; comma-separated list")
+	flag.BoolVar(&options.AllErrors, "goimports.e", false, "report all errors (not just the first 10 on different lines)")
+	flag.StringVar(&imports.LocalPrefix, "goimports.local", "", "put imports beginning with this string after 3rd-party packages; comma-separated list")
 }
 
 func report(err error) {
@@ -187,16 +187,6 @@ func walkDir(path string) {
 	filepath.Walk(path, visitFile)
 }
 
-func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-
-	// call gofmtMain in a separate function
-	// so that it can use defer and have them
-	// run before the exit.
-	gofmtMain()
-	os.Exit(exitCode)
-}
-
 // parseFlags parses command line flags and returns the paths to process.
 // It's a var so that custom implementations can replace it in other files.
 var parseFlags = func() []string {
@@ -235,7 +225,6 @@ func gofmtMain() {
 	// doTrace is a conditionally compiled wrapper around runtime/trace. It is
 	// used to allow goimports to compile under gccgo, which does not support
 	// runtime/trace. See https://golang.org/issue/15544.
-	defer doTrace()()
 	if *memProfileRate > 0 {
 		runtime.MemProfileRate = *memProfileRate
 		bw, flush := bufferedFileWriter(*memProfile)
