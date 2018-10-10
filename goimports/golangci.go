@@ -8,11 +8,13 @@ import (
 	"golang.org/x/tools/imports"
 )
 
-func Run(filename string) ([]byte, error) {
+func Run(filename, localPrefix string) ([]byte, error) {
 	src, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
+
+	imports.LocalPrefix = localPrefix
 
 	res, err := imports.Process(filename, src, options)
 	if err != nil {
