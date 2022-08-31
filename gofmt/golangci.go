@@ -14,6 +14,8 @@ func Run(filename string, needSimplify bool) ([]byte, error) {
 	return RunRewrite(filename, needSimplify, "")
 }
 
+// RunRewrite
+// empty string `rewrite` will be ignored.
 func RunRewrite(filename string, needSimplify bool, rewrite string) ([]byte, error) {
 	rewriter, err := getRewrite(rewrite)
 	if err != nil {
