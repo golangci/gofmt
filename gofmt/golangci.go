@@ -10,18 +10,15 @@ import (
 	"strings"
 )
 
+// Run runs gofmt.
+// Deprecated: use RunRewrite instead.
 func Run(filename string, needSimplify bool) ([]byte, error) {
 	return RunRewrite(filename, needSimplify, "")
 }
 
-// RunRewrite
+// RunRewrite runs gofmt.
 // empty string `rewrite` will be ignored.
-func RunRewrite(filename string, needSimplify bool, rewrite string) ([]byte, error) {
-	rewriter, err := getRewrite(rewrite)
-	if err != nil {
-		return nil, err
-	}
-
+func RunRewrite(filename string, needSimplify bool, rewriteRule string) ([]byte, error) {
 	src, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -40,8 +37,9 @@ func RunRewrite(filename string, needSimplify bool, rewrite string) ([]byte, err
 		simplify(file)
 	}
 
-	if rewriter != nil {
-		file = rewriter(file)
+	file, err = rewriteFileContent(rewriteRule, file)
+	if err != nil {
+		return nil, err
 	}
 
 	res, err := format(fileSet, file, sourceAdj, indentAdj, src, printer.Config{Mode: printerMode, Tabwidth: tabWidth})
@@ -62,29 +60,30 @@ func RunRewrite(filename string, needSimplify bool, rewrite string) ([]byte, err
 	return data, nil
 }
 
-func getRewrite(rewriteRule string) (func(*ast.File) *ast.File, error) {
+func rewriteFileContent(rewriteRule string, file *ast.File) (*ast.File, error) {
 	if rewriteRule == "" {
-		return nil, nil
+		return file, nil
 	}
 
 	f := strings.Split(rewriteRule, "->")
 	if len(f) != 2 {
 		return nil, fmt.Errorf("rewrite rule must be of the form 'pattern -> replacement'\n")
 	}
-	pattern, err := parseExprErr(f[0], "pattern")
+
+	pattern, err := parseExpression(f[0], "pattern")
 	if err != nil {
 		return nil, err
 	}
 
-	replace, err := parseExprErr(f[1], "replacement")
+	replace, err := parseExpression(f[1], "replacement")
 	if err != nil {
 		return nil, err
 	}
 
-	return func(p *ast.File) *ast.File { return rewriteFile(pattern, replace, p) }, nil
+	return rewriteFile(pattern, replace, file), nil
 }
 
-func parseExprErr(s, what string) (ast.Expr, error) {
+func parseExpression(s, what string) (ast.Expr, error) {
 	x, err := parser.ParseExpr(s)
 	if err != nil {
 		return nil, fmt.Errorf("parsing %s %s at %s\n", what, s, err)
