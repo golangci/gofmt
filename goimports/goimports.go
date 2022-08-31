@@ -15,21 +15,24 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"runtime/pprof"
 	"strings"
 
-	"golang.org/x/tools/imports"
+	exec "golang.org/x/sys/execabs"
+
+	"github.com/golangci/gofmt/goimports/internal/gocommand"
+	"github.com/golangci/gofmt/goimports/internal/imports"
 )
 
 var (
 	// main operation modes
-	list    = flag.Bool("goimports.l", false, "list files whose formatting differs from goimport's")
-	write   = flag.Bool("goimports.w", false, "write result to (source) file instead of stdout")
-	doDiff  = flag.Bool("goimports.d", false, "display diffs instead of rewriting files")
-	srcdir  = flag.String("goimports.srcdir", "", "choose imports as if source code is from `dir`. When operating on a single file, dir may instead be the complete file name.")
+	list   = flag.Bool("goimports.l", false, "list files whose formatting differs from goimport's")
+	write  = flag.Bool("goimports.w", false, "write result to (source) file instead of stdout")
+	doDiff = flag.Bool("goimports.d", false, "display diffs instead of rewriting files")
+	srcdir = flag.String("goimports.srcdir", "", "choose imports as if source code is from `dir`. When operating on a single file, dir may instead be the complete file name.")
+
 	verbose bool // verbose logging
 
 	cpuProfile     = flag.String("goimports.cpuprofile", "", "CPU profile output")
@@ -41,13 +44,17 @@ var (
 		TabIndent: true,
 		Comments:  true,
 		Fragment:  true,
+		Env: &imports.ProcessEnv{
+			GocmdRunner: &gocommand.Runner{},
+		},
 	}
 	exitCode = 0
 )
 
 func init() {
 	flag.BoolVar(&options.AllErrors, "goimports.e", false, "report all errors (not just the first 10 on different lines)")
-	flag.StringVar(&imports.LocalPrefix, "goimports.local", "", "put imports beginning with this string after 3rd-party packages; comma-separated list")
+	flag.StringVar(&options.LocalPrefix, "goimports.local", "", "put imports beginning with this string after 3rd-party packages; comma-separated list")
+	flag.BoolVar(&options.FormatOnly, "goimports.format-only", false, "if true, don't fix imports and only format. In this mode, goimports is effectively gofmt, with the addition that imports are grouped into sections.")
 }
 
 func report(err error) {
@@ -148,7 +155,12 @@ func processFile(filename string, in io.Reader, out io.Writer, argType argumentT
 				// filename is "<standard input>"
 				return errors.New("can't use -w on stdin")
 			}
-			err = ioutil.WriteFile(filename, res, 0)
+			// On Windows, we need to re-set the permissions from the file. See golang/go#38225.
+			var perms os.FileMode
+			if fi, err := os.Stat(filename); err == nil {
+				perms = fi.Mode() & os.ModePerm
+			}
+			err = ioutil.WriteFile(filename, res, perms)
 			if err != nil {
 				return err
 			}
@@ -190,7 +202,7 @@ func walkDir(path string) {
 // parseFlags parses command line flags and returns the paths to process.
 // It's a var so that custom implementations can replace it in other files.
 var parseFlags = func() []string {
-	flag.BoolVar(&verbose, "v", false, "verbose logging")
+	flag.BoolVar(&verbose, "goimports.v", false, "verbose logging")
 
 	flag.Parse()
 	return flag.Args()
@@ -225,6 +237,7 @@ func gofmtMain() {
 	// doTrace is a conditionally compiled wrapper around runtime/trace. It is
 	// used to allow goimports to compile under gccgo, which does not support
 	// runtime/trace. See https://golang.org/issue/15544.
+	defer doTrace()()
 	if *memProfileRate > 0 {
 		runtime.MemProfileRate = *memProfileRate
 		bw, flush := bufferedFileWriter(*memProfile)
@@ -239,7 +252,7 @@ func gofmtMain() {
 
 	if verbose {
 		log.SetFlags(log.LstdFlags | log.Lmicroseconds)
-		imports.Debug = true
+		options.Env.Logf = log.Printf
 	}
 	if options.TabWidth < 0 {
 		fmt.Fprintf(os.Stderr, "negative tabwidth %d\n", options.TabWidth)
