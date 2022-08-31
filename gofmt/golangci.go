@@ -13,12 +13,11 @@ import (
 // Run runs gofmt.
 // Deprecated: use RunRewrite instead.
 func Run(filename string, needSimplify bool) ([]byte, error) {
-	return RunRewrite(filename, needSimplify, "")
+	return RunRewrite(filename, needSimplify, nil)
 }
 
 // RunRewrite runs gofmt.
-// empty string `rewrite` will be ignored.
-func RunRewrite(filename string, needSimplify bool, rewriteRule string) ([]byte, error) {
+func RunRewrite(filename string, needSimplify bool, rewriteRules []string) ([]byte, error) {
 	src, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -37,9 +36,11 @@ func RunRewrite(filename string, needSimplify bool, rewriteRule string) ([]byte,
 		simplify(file)
 	}
 
-	file, err = rewriteFileContent(rewriteRule, file)
-	if err != nil {
-		return nil, err
+	for _, rule := range rewriteRules {
+		file, err = rewriteFileContent(rule, file)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	res, err := format(fileSet, file, sourceAdj, indentAdj, src, printer.Config{Mode: printerMode, Tabwidth: tabWidth})
@@ -61,13 +62,9 @@ func RunRewrite(filename string, needSimplify bool, rewriteRule string) ([]byte,
 }
 
 func rewriteFileContent(rewriteRule string, file *ast.File) (*ast.File, error) {
-	if rewriteRule == "" {
-		return file, nil
-	}
-
 	f := strings.Split(rewriteRule, "->")
 	if len(f) != 2 {
-		return nil, fmt.Errorf("rewrite rule must be of the form 'pattern -> replacement'\n")
+		return nil, fmt.Errorf("rewrite rule must be of the form 'pattern -> replacement', got %q instead", rewriteRule)
 	}
 
 	pattern, err := parseExpression(f[0], "pattern")
