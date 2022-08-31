@@ -6,6 +6,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/printer"
+	"go/token"
 	"os"
 	"strings"
 )
@@ -24,25 +25,27 @@ func RunRewrite(filename string, needSimplify bool, rewriteRule string) ([]byte,
 		return nil, err
 	}
 
+	fset := token.NewFileSet()
+
 	initParserMode()
 
-	file, sourceAdj, indentAdj, err := parse(fileSet, filename, src, false)
+	file, sourceAdj, indentAdj, err := parse(fset, filename, src, false)
 	if err != nil {
 		return nil, err
 	}
 
-	ast.SortImports(fileSet, file)
+	file, err = rewriteFileContent(fset, rewriteRule, file)
+	if err != nil {
+		return nil, err
+	}
+
+	ast.SortImports(fset, file)
 
 	if needSimplify {
 		simplify(file)
 	}
 
-	file, err = rewriteFileContent(rewriteRule, file)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := format(fileSet, file, sourceAdj, indentAdj, src, printer.Config{Mode: printerMode, Tabwidth: tabWidth})
+	res, err := format(fset, file, sourceAdj, indentAdj, src, printer.Config{Mode: printerMode, Tabwidth: tabWidth})
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +55,7 @@ func RunRewrite(filename string, needSimplify bool, rewriteRule string) ([]byte,
 	}
 
 	// formatting has changed
-	data, err := diff(src, res, filename)
+	data, err := diffWithReplaceTempFile(src, res, filename)
 	if err != nil {
 		return nil, fmt.Errorf("error computing diff: %s", err)
 	}
@@ -60,7 +63,7 @@ func RunRewrite(filename string, needSimplify bool, rewriteRule string) ([]byte,
 	return data, nil
 }
 
-func rewriteFileContent(rewriteRule string, file *ast.File) (*ast.File, error) {
+func rewriteFileContent(fset *token.FileSet, rewriteRule string, file *ast.File) (*ast.File, error) {
 	if rewriteRule == "" {
 		return file, nil
 	}
@@ -80,7 +83,7 @@ func rewriteFileContent(rewriteRule string, file *ast.File) (*ast.File, error) {
 		return nil, err
 	}
 
-	return rewriteFile(pattern, replace, file), nil
+	return rewriteFile(fset, pattern, replace, file), nil
 }
 
 func parseExpression(s, what string) (ast.Expr, error) {
