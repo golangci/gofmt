@@ -8,18 +8,22 @@ import (
 	"go/printer"
 	"go/token"
 	"os"
-	"strings"
 )
+
+type RewriteRule struct {
+	Pattern     string
+	Replacement string
+}
 
 // Run runs gofmt.
 // Deprecated: use RunRewrite instead.
 func Run(filename string, needSimplify bool) ([]byte, error) {
-	return RunRewrite(filename, needSimplify, "")
+	return RunRewrite(filename, needSimplify, nil)
 }
 
 // RunRewrite runs gofmt.
 // empty string `rewrite` will be ignored.
-func RunRewrite(filename string, needSimplify bool, rewriteRule string) ([]byte, error) {
+func RunRewrite(filename string, needSimplify bool, rewriteRules []RewriteRule) ([]byte, error) {
 	src, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -34,7 +38,7 @@ func RunRewrite(filename string, needSimplify bool, rewriteRule string) ([]byte,
 		return nil, err
 	}
 
-	file, err = rewriteFileContent(fset, rewriteRule, file)
+	file, err = rewriteFileContent(fset, file, rewriteRules)
 	if err != nil {
 		return nil, err
 	}
@@ -63,33 +67,28 @@ func RunRewrite(filename string, needSimplify bool, rewriteRule string) ([]byte,
 	return data, nil
 }
 
-func rewriteFileContent(fset *token.FileSet, rewriteRule string, file *ast.File) (*ast.File, error) {
-	if rewriteRule == "" {
-		return file, nil
+func rewriteFileContent(fset *token.FileSet, file *ast.File, rewriteRules []RewriteRule) (*ast.File, error) {
+	for _, rewriteRule := range rewriteRules {
+		pattern, err := parseExpression(rewriteRule.Pattern, "pattern")
+		if err != nil {
+			return nil, err
+		}
+
+		replacement, err := parseExpression(rewriteRule.Replacement, "replacement")
+		if err != nil {
+			return nil, err
+		}
+
+		file = rewriteFile(fset, pattern, replacement, file)
 	}
 
-	f := strings.Split(rewriteRule, "->")
-	if len(f) != 2 {
-		return nil, fmt.Errorf("rewrite rule must be of the form 'pattern -> replacement'\n")
-	}
-
-	pattern, err := parseExpression(f[0], "pattern")
-	if err != nil {
-		return nil, err
-	}
-
-	replace, err := parseExpression(f[1], "replacement")
-	if err != nil {
-		return nil, err
-	}
-
-	return rewriteFile(fset, pattern, replace, file), nil
+	return file, nil
 }
 
 func parseExpression(s, what string) (ast.Expr, error) {
 	x, err := parser.ParseExpr(s)
 	if err != nil {
-		return nil, fmt.Errorf("parsing %s %s at %s\n", what, s, err)
+		return nil, fmt.Errorf("parsing %s %q at %s\n", what, s, err)
 	}
 	return x, nil
 }
