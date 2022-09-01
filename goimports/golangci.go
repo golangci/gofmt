@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/golangci/gofmt/goimports/internal/imports"
+	"golang.org/x/tools/imports"
 )
 
+// Run runs goimports.
+// The local prefixes (comma separated) must be defined through the global variable imports.LocalPrefix.
 func Run(filename string) ([]byte, error) {
 	src, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := imports.Process(filename, src, options)
+	res, err := imports.Process(filename, src, nil)
 	if err != nil {
 		return nil, err
 	}
