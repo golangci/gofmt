@@ -46,7 +46,9 @@ func diff(b1, b2 []byte, filename string) (data []byte, err error) {
 	defer os.Remove(f2)
 
 	cmd := "diff"
-	if runtime.GOOS == "plan9" {
+	if runtime.GOOS == "windows" {
+		cmd = "diff.exe"
+	} else if runtime.GOOS == "plan9" {
 		cmd = "/bin/ape/diff"
 	}
 
