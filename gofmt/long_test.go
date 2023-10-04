@@ -22,6 +22,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/golangci/gofmt/gofmt/internal/testenv"
 )
 
 var (
@@ -113,7 +115,8 @@ func genFilenames(t *testing.T, filenames chan<- string) {
 			t.Error(err)
 			return nil
 		}
-		if isGoFile(d) {
+		// don't descend into testdata directories
+		if isGoFile(d) && !strings.Contains(filepath.ToSlash(filename), "/testdata/") {
 			filenames <- filename
 			nfiles++
 		}
@@ -130,7 +133,11 @@ func genFilenames(t *testing.T, filenames chan<- string) {
 	}
 
 	// otherwise, test all Go files under *root
-	filepath.WalkDir(*root, handleFile)
+	goroot := *root
+	if goroot == "" {
+		goroot = testenv.GOROOT(t)
+	}
+	filepath.WalkDir(goroot, handleFile)
 }
 
 func TestAll(t *testing.T) {
