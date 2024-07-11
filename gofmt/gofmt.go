@@ -14,7 +14,6 @@ import (
 	"go/printer"
 	"go/scanner"
 	"go/token"
-	"internal/diff"
 	"io"
 	"io/fs"
 	"math/rand"
@@ -25,6 +24,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/golangci/gofmt/gofmt/internal/diff"
 	"golang.org/x/sync/semaphore"
 )
 
