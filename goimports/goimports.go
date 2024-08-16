@@ -13,7 +13,7 @@ import (
 	"runtime"
 )
 
-// Extracted from golang.org/x/tools@v0.18.0/cmd/goimports/goimports.go
+// Extracted from golang.org/x/tools@v0.24.0/cmd/goimports/goimports.go
 
 func writeTempFile(dir, prefix string, data []byte) (string, error) {
 	file, err := os.CreateTemp(dir, prefix)
