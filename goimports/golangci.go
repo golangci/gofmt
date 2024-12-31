@@ -2,9 +2,10 @@ package goimports
 
 import (
 	"bytes"
-	"fmt"
 	"os"
+	"path/filepath"
 
+	"github.com/rogpeppe/go-internal/diff"
 	"golang.org/x/tools/imports"
 )
 
@@ -26,10 +27,8 @@ func Run(filename string) ([]byte, error) {
 	}
 
 	// formatting has changed
-	data, err := diff(src, res, filename)
-	if err != nil {
-		return nil, fmt.Errorf("error computing diff: %s", err)
-	}
+	newName := filepath.ToSlash(filename)
+	oldName := newName + ".orig"
 
-	return data, nil
+	return diff.Diff(oldName, src, newName, res), nil
 }
