@@ -13,7 +13,7 @@ import (
 	"testing"
 	"text/scanner"
 
-	"github.com/golangci/gofmt/gofmt/internal/diff"
+	"github.com/rogpeppe/go-internal/diff"
 )
 
 var update = flag.Bool("update", false, "update .golden files")

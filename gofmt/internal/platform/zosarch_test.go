@@ -8,12 +8,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"flag"
-	"internal/diff"
-	"internal/testenv"
 	"os"
 	"os/exec"
 	"testing"
 	"text/template"
+
+	"github.com/golangci/gofmt/gofmt/internal/testenv"
+	"github.com/rogpeppe/go-internal/diff"
 )
 
 var flagFix = flag.Bool("fix", false, "if true, fix out-of-date generated files")

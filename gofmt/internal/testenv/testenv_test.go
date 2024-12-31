@@ -5,13 +5,14 @@
 package testenv_test
 
 import (
-	"internal/platform"
-	"internal/testenv"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/golangci/gofmt/gofmt/internal/platform"
+	"github.com/golangci/gofmt/gofmt/internal/testenv"
 )
 
 func TestGoToolLocation(t *testing.T) {

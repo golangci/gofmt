@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/golangci/gofmt/gofmt/internal/diff"
+	"github.com/rogpeppe/go-internal/diff"
 )
 
 type Options struct {
