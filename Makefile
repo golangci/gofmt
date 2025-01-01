@@ -1,11 +1,6 @@
-.PHONY: build build_gofmt build_goimports
+.PHONY: build
 
 default: build
 
-build: build_gofmt build_goimports
-
-build_gofmt:
+build:
 	go build ./gofmt
-
-build_goimports:
-	go build ./goimports
