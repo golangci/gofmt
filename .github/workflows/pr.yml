@@ -21,5 +21,3 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Build gofmt
         run: go build ./gofmt
-      - name: Build goimports
-        run: go build ./goimports
