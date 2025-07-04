@@ -1,11 +1,10 @@
 module github.com/golangci/gofmt
 
-go 1.22.0
+go 1.23.0
 
 require (
-	github.com/rogpeppe/go-internal v1.13.1
-	golang.org/x/sync v0.10.0
-	golang.org/x/tools v0.28.0
+	github.com/rogpeppe/go-internal v1.14.1
+	golang.org/x/sync v0.15.0
 )
 
-require golang.org/x/mod v0.22.0 // indirect
+require golang.org/x/tools v0.34.0 // indirect
