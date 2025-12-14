@@ -9,6 +9,10 @@
 
 ## Updates
 
+- 2025-12-14: Sync with go1.26.0-pre-rc1
+  - except (because it uses go1.26 specific elements):
+    - `internal/testenv/testenv_unix.go`
+    - `internal/platform/zosarch.go`
 - 2025-07-04: Sync with go1.24.4
 - 2025-04-14: Sync with go1.23.8
 - 2024-08-17: Sync with go1.22.6
