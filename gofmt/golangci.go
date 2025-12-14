@@ -1,17 +1,12 @@
 package gofmt
 
 import (
-	"bytes"
 	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/printer"
 	"go/token"
-	"os"
-	"path/filepath"
 	"sync"
-
-	"github.com/rogpeppe/go-internal/diff"
 )
 
 type Options struct {
@@ -24,58 +19,6 @@ var parserModeMu sync.RWMutex
 type RewriteRule struct {
 	Pattern     string
 	Replacement string
-}
-
-// Run runs gofmt.
-// Deprecated: use [Source] instead.
-func Run(filename string, needSimplify bool) ([]byte, error) {
-	return RunRewrite(filename, needSimplify, nil)
-}
-
-// RunRewrite runs gofmt.
-// Deprecated: use [Source] instead.
-func RunRewrite(filename string, needSimplify bool, rewriteRules []RewriteRule) ([]byte, error) {
-	src, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	fset := token.NewFileSet()
-
-	parserModeMu.Lock()
-	initParserMode()
-	parserModeMu.Unlock()
-
-	file, sourceAdj, indentAdj, err := parse(fset, filename, src, false)
-	if err != nil {
-		return nil, err
-	}
-
-	file, err = rewriteFileContent(fset, file, rewriteRules)
-	if err != nil {
-		return nil, err
-	}
-
-	ast.SortImports(fset, file)
-
-	if needSimplify {
-		simplify(file)
-	}
-
-	res, err := format(fset, file, sourceAdj, indentAdj, src, printer.Config{Mode: printerMode, Tabwidth: tabWidth})
-	if err != nil {
-		return nil, err
-	}
-
-	if bytes.Equal(src, res) {
-		return nil, nil
-	}
-
-	// formatting has changed
-	newName := filepath.ToSlash(filename)
-	oldName := newName + ".orig"
-
-	return diff.Diff(oldName, src, newName, res), nil
 }
 
 // Source formats the code like gofmt.
