@@ -1,6 +1,9 @@
 .PHONY: build
 
-default: build
+default: test build
 
 build:
-	go build ./gofmt
+	go build .
+
+test:
+	go test ./...

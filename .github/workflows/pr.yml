@@ -19,5 +19,5 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
-      - name: Build gofmt
-        run: go build ./gofmt
+      - name: Tests and build
+        run: make

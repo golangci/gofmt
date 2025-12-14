@@ -1,76 +1,51 @@
 package internal
 
 import (
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/printer"
 	"go/token"
-	"sync"
 )
 
-type Options struct {
-	NeedSimplify bool
-	RewriteRules []RewriteRule
+/*
+ The goal of this file is:
+ - to expose the unexported constants and the function.
+ - set the parserMode.
+*/
+
+const (
+	TabWidth    = tabWidth
+	PrinterMode = printerMode
+)
+
+// https://github.com/golang/go/blob/1b291b70dff51732415da5b68debe323704d8e8d/src/cmd/gofmt/gofmt.go#L81-L91
+// https://github.com/golang/go/blob/1b291b70dff51732415da5b68debe323704d8e8d/src/go/format/format.go#L41
+const parserMode = parser.ParseComments | parser.SkipObjectResolution
+
+func Parse(fset *token.FileSet, filename string, src []byte, fragmentOk bool) (
+	file *ast.File,
+	sourceAdj func(src []byte, indent int) []byte,
+	indentAdj int,
+	err error,
+) {
+	return parse(fset, filename, src, fragmentOk)
 }
 
-var parserModeMu sync.RWMutex
-
-type RewriteRule struct {
-	Pattern     string
-	Replacement string
+func Format(
+	fset *token.FileSet,
+	file *ast.File,
+	sourceAdj func(src []byte, indent int) []byte,
+	indentAdj int,
+	src []byte,
+	cfg printer.Config,
+) ([]byte, error) {
+	return format(fset, file, sourceAdj, indentAdj, src, cfg)
 }
 
-// Source formats the code like gofmt.
-// Empty string `rewrite` will be ignored.
-func Source(filename string, src []byte, opts Options) ([]byte, error) {
-	fset := token.NewFileSet()
-
-	parserModeMu.Lock()
-	initParserMode()
-	parserModeMu.Unlock()
-
-	file, sourceAdj, indentAdj, err := parse(fset, filename, src, false)
-	if err != nil {
-		return nil, err
-	}
-
-	file, err = rewriteFileContent(fset, file, opts.RewriteRules)
-	if err != nil {
-		return nil, err
-	}
-
-	ast.SortImports(fset, file)
-
-	if opts.NeedSimplify {
-		simplify(file)
-	}
-
-	return format(fset, file, sourceAdj, indentAdj, src, printer.Config{Mode: printerMode, Tabwidth: tabWidth})
+func Simplify(f *ast.File) {
+	simplify(f)
 }
 
-func rewriteFileContent(fset *token.FileSet, file *ast.File, rewriteRules []RewriteRule) (*ast.File, error) {
-	for _, rewriteRule := range rewriteRules {
-		pattern, err := parseExpression(rewriteRule.Pattern, "pattern")
-		if err != nil {
-			return nil, err
-		}
-
-		replacement, err := parseExpression(rewriteRule.Replacement, "replacement")
-		if err != nil {
-			return nil, err
-		}
-
-		file = rewriteFile(fset, pattern, replacement, file)
-	}
-
-	return file, nil
-}
-
-func parseExpression(s, what string) (ast.Expr, error) {
-	x, err := parser.ParseExpr(s)
-	if err != nil {
-		return nil, fmt.Errorf("parsing %s %q at %s\n", what, s, err)
-	}
-	return x, nil
+func RewriteFile(fileSet *token.FileSet, pattern, replace ast.Expr, p *ast.File) *ast.File {
+	return rewriteFile(fileSet, pattern, replace, p)
 }

@@ -10,7 +10,6 @@ import (
 	"flag"
 	"fmt"
 	"go/ast"
-	"go/parser"
 	"go/printer"
 	"go/scanner"
 	"go/token"
@@ -67,8 +66,8 @@ const (
 var fdSem = make(chan bool, 200)
 
 var (
-	rewrite    func(*token.FileSet, *ast.File) *ast.File
-	parserMode parser.Mode
+	rewrite func(*token.FileSet, *ast.File) *ast.File
+	// parserMode parser.Mode // NOTE(golangci-lint): replaced with a constant
 )
 
 func usage() {
@@ -76,16 +75,19 @@ func usage() {
 	flag.PrintDefaults()
 }
 
+// NOTE(golangci-lint): replaced with a constant
 func initParserMode() {
-	parserMode = parser.ParseComments
-	if *allErrors {
-		parserMode |= parser.AllErrors
-	}
-	// It's only -r that makes use of go/ast's object resolution,
-	// so avoid the unnecessary work if the flag isn't used.
-	if *rewriteRule == "" {
-		parserMode |= parser.SkipObjectResolution
-	}
+	/*
+		parserMode = parser.ParseComments
+		if *allErrors {
+			parserMode |= parser.AllErrors
+		}
+		// It's only -r that makes use of go/ast's object resolution,
+		// so avoid the unnecessary work if the flag isn't used.
+		if *rewriteRule == "" {
+			parserMode |= parser.SkipObjectResolution
+		}
+	*/
 }
 
 func isGoFilename(name string) bool {
