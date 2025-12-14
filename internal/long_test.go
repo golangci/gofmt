@@ -6,7 +6,7 @@
 // To test specific files provide a list of comma-separated
 // filenames via the -files flag: go test -files=gofmt.go .
 
-package gofmt
+package internal
 
 import (
 	"bytes"
@@ -23,7 +23,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/golangci/gofmt/gofmt/internal/testenv"
+	"github.com/golangci/gofmt/internal/internal/testenv"
 )
 
 var (

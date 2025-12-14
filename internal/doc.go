@@ -99,7 +99,7 @@ When invoked with -s gofmt will make the following source transformations where 
 
 This may result in changes that are incompatible with earlier versions of Go.
 */
-package gofmt
+package internal
 
 // BUG(rsc): The implementation of -r is a bit slow.
 // BUG(gri): If -w fails, the restored original file may not have some of the

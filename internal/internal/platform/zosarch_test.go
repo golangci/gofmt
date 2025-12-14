@@ -13,7 +13,7 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/golangci/gofmt/gofmt/internal/testenv"
+	"github.com/golangci/gofmt/internal/internal/testenv"
 	"github.com/rogpeppe/go-internal/diff"
 )
 

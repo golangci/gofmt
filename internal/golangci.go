@@ -1,4 +1,4 @@
-package gofmt
+package internal
 
 import (
 	"fmt"

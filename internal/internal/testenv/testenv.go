@@ -24,9 +24,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/golangci/gofmt/gofmt/internal/cfg"
-	"github.com/golangci/gofmt/gofmt/internal/goarch"
-	"github.com/golangci/gofmt/gofmt/internal/platform"
+	"github.com/golangci/gofmt/internal/internal/cfg"
+	"github.com/golangci/gofmt/internal/internal/goarch"
+	"github.com/golangci/gofmt/internal/internal/platform"
 )
 
 // Save the original environment during init for use in checks. A test

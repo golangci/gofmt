@@ -4,7 +4,7 @@
 
 //go:build unix
 
-package gofmt
+package internal
 
 import (
 	"os"
