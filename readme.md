@@ -32,7 +32,7 @@ The `parserMode` is a global variable for `gofmt` and a constant for `go/format`
 
 The constants (`tabWidth`, `printerMode`, `printerNormalizeNumbers`) are duplicated inside:
 - [`go/src/cmd/gofmt/gofmt.go`](https://github.com/golang/go/blob/1b291b70dff51732415da5b68debe323704d8e8d/src/cmd/gofmt/gofmt.go#L49-L59)
-- [go/src/go/format/format.go](https://github.com/golang/go/blob/1b291b70dff51732415da5b68debe323704d8e8d/src/go/format/format.go#L27-L37)
+- [`go/src/go/format/format.go`](https://github.com/golang/go/blob/1b291b70dff51732415da5b68debe323704d8e8d/src/go/format/format.go#L27-L37)
 
 Theoretically, only the following files are required:
 - `gofmt.go` (only the constants (`tabWidth`, `printerMode`, `printerNormalizeNumbers`))
