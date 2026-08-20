@@ -47,7 +47,6 @@ var List = []OSArch{
 	{"openbsd", "amd64"},
 	{"openbsd", "arm"},
 	{"openbsd", "arm64"},
-	{"openbsd", "mips64"},
 	{"openbsd", "ppc64"},
 	{"openbsd", "riscv64"},
 	{"plan9", "386"},
@@ -57,7 +56,6 @@ var List = []OSArch{
 	{"wasip1", "wasm"},
 	{"windows", "386"},
 	{"windows", "amd64"},
-	{"windows", "arm"},
 	{"windows", "arm64"},
 }
 
@@ -74,7 +72,7 @@ var distInfo = map[OSArch]osArchInfo{
 	{"freebsd", "amd64"}:   {CgoSupported: true},
 	{"freebsd", "arm"}:     {CgoSupported: true},
 	{"freebsd", "arm64"}:   {CgoSupported: true},
-	{"freebsd", "riscv64"}: {CgoSupported: true},
+	{"freebsd", "riscv64"}: {CgoSupported: true, Broken: true},
 	{"illumos", "amd64"}:   {CgoSupported: true},
 	{"ios", "amd64"}:       {CgoSupported: true},
 	{"ios", "arm64"}:       {CgoSupported: true},
@@ -88,7 +86,7 @@ var distInfo = map[OSArch]osArchInfo{
 	{"linux", "mips64"}:    {CgoSupported: true},
 	{"linux", "mips64le"}:  {CgoSupported: true},
 	{"linux", "mipsle"}:    {CgoSupported: true},
-	{"linux", "ppc64"}:     {},
+	{"linux", "ppc64"}:     {CgoSupported: true},
 	{"linux", "ppc64le"}:   {CgoSupported: true},
 	{"linux", "riscv64"}:   {CgoSupported: true},
 	{"linux", "s390x"}:     {CgoSupported: true},
@@ -101,7 +99,6 @@ var distInfo = map[OSArch]osArchInfo{
 	{"openbsd", "amd64"}:   {CgoSupported: true},
 	{"openbsd", "arm"}:     {CgoSupported: true},
 	{"openbsd", "arm64"}:   {CgoSupported: true},
-	{"openbsd", "mips64"}:  {CgoSupported: true, Broken: true},
 	{"openbsd", "ppc64"}:   {},
 	{"openbsd", "riscv64"}: {CgoSupported: true},
 	{"plan9", "386"}:       {},
@@ -111,6 +108,5 @@ var distInfo = map[OSArch]osArchInfo{
 	{"wasip1", "wasm"}:     {},
 	{"windows", "386"}:     {CgoSupported: true, FirstClass: true},
 	{"windows", "amd64"}:   {CgoSupported: true, FirstClass: true},
-	{"windows", "arm"}:     {Broken: true},
 	{"windows", "arm64"}:   {CgoSupported: true},
 }

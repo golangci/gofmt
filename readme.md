@@ -2,6 +2,7 @@
 
 ## Updates
 
+- 2026-08-20: Sync with go1.27.0
 - 2025-12-14: Sync with go1.26.0-pre-rc1
   - except (because it uses go1.26 specific elements):
     - `internal/testenv/testenv_unix.go`
